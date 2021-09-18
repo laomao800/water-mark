@@ -54,13 +54,13 @@ var getTextRect = function (text, fontSize, lineHeight) {
     return { width: width, height: height };
 };
 
-var BASIC_MASK_STYLE = "pointer-events:none;position:fixed;";
 var WaterMark = /** @class */ (function () {
     function WaterMark(def) {
         this.$el = document.body;
         this.$mask = null;
         this.text = '';
         this.config = {
+            fixed: true,
             fontSize: 12,
             color: '#000',
             opacity: 0.08,
@@ -87,25 +87,40 @@ var WaterMark = /** @class */ (function () {
         this.createMask();
     }
     WaterMark.prototype.createMask = function () {
-        this.$mask = document.createElement('div');
-        this.$mask.setAttribute('style', BASIC_MASK_STYLE);
-        this.$mask.style.zIndex = this.config.zIndex;
-        this.$mask.style.opacity = this.config.opacity;
-        this.$mask.style.backgroundImage = "url(\"" + this.createMaskImage() + "\")";
+        var maskEl = document.createElement('div');
+        maskEl.setAttribute('style', 'pointer-events:none;');
+        maskEl.style.zIndex = String(this.config.zIndex);
+        maskEl.style.opacity = String(this.config.opacity);
+        maskEl.style.backgroundImage = "url(\"" + this.createMaskImage() + "\")";
+        maskEl.style.width = '100%';
+        maskEl.style.top = '0';
+        maskEl.style.left = '0';
         if (this.$el === document.body) {
-            this.$mask.style.top = 0;
-            this.$mask.style.left = 0;
-            this.$mask.style.width = '100%';
-            this.$mask.style.height = '100%';
+            maskEl.style.height = this.$el.scrollHeight + "px";
+            if (this.config.fixed) {
+                maskEl.style.position = 'fixed';
+            }
+            else {
+                this.$el.style.position = 'relative';
+                maskEl.style.position = 'absolute';
+            }
         }
         else {
-            var _a = this.$el.getBoundingClientRect(), top_1 = _a.top, left = _a.left, width = _a.width, height = _a.height;
-            this.$mask.style.top = parsePx(top_1);
-            this.$mask.style.left = parsePx(left);
-            this.$mask.style.width = parsePx(width);
-            this.$mask.style.height = parsePx(height);
+            this.$el.style.position = 'relative';
+            if (this.config.fixed) {
+                var height = this.$el.getBoundingClientRect().height;
+                maskEl.style.position = 'sticky';
+                maskEl.style.height = parsePx(height);
+                maskEl.style.marginBottom = parsePx(height * -1);
+            }
+            else {
+                this.$el.style.position = 'relative';
+                maskEl.style.position = 'absolute';
+                maskEl.style.height = parsePx(this.$el.scrollHeight);
+            }
         }
-        this.$el.appendChild(this.$mask);
+        this.$el.prepend(maskEl);
+        this.$mask = maskEl;
     };
     WaterMark.prototype.createMaskImage = function () {
         var _this = this;
