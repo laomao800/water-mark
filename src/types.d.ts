@@ -1,4 +1,4 @@
-export interface InitCofig {
+export interface InitConfig {
   /**
    * 水印挂载节点
    * @default document.body

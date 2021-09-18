@@ -1,5 +1,5 @@
+import type { InitConfig } from './types'
 import { parsePx, getTextRect, isPlainObject } from './utils'
-import { InitCofig } from './types'
 
 const BASIC_MASK_STYLE = `pointer-events:none;position:fixed;`
 
@@ -7,7 +7,7 @@ export default class WaterMark {
   private $el = document.body
   private $mask = null
   private text = ''
-  private config: Partial<InitCofig> = {
+  private config: Partial<InitConfig> = {
     fontSize: 12,
     color: '#000',
     opacity: 0.08,
@@ -17,7 +17,7 @@ export default class WaterMark {
     zIndex: 999999,
   }
 
-  constructor(def: string | InitCofig) {
+  constructor(def: string | InitConfig) {
     if (isPlainObject(def)) {
       this.config = { ...this.config, ...def }
       this.text = def.text
