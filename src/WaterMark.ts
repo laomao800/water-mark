@@ -1,13 +1,12 @@
 import type { InitConfig } from './types'
 import { parsePx, getTextRect, isPlainObject } from './utils'
 
-const BASIC_MASK_STYLE = `pointer-events:none;position:fixed;`
-
 export default class WaterMark {
   private $el = document.body
   private $mask = null
   private text = ''
   private config: Partial<InitConfig> = {
+    fixed: true,
     fontSize: 12,
     color: '#000',
     opacity: 0.08,
@@ -37,26 +36,39 @@ export default class WaterMark {
   }
 
   private createMask() {
-    this.$mask = document.createElement('div')
-    this.$mask.setAttribute('style', BASIC_MASK_STYLE)
-    this.$mask.style.zIndex = this.config.zIndex
-    this.$mask.style.opacity = this.config.opacity
-    this.$mask.style.backgroundImage = `url("${this.createMaskImage()}")`
+    const maskEl = document.createElement('div')
+    maskEl.setAttribute('style', 'pointer-events:none;')
+    maskEl.style.zIndex = String(this.config.zIndex)
+    maskEl.style.opacity = String(this.config.opacity)
+    maskEl.style.backgroundImage = `url("${this.createMaskImage()}")`
+    maskEl.style.width = '100%'
+    maskEl.style.top = '0'
+    maskEl.style.left = '0'
 
     if (this.$el === document.body) {
-      this.$mask.style.top = 0
-      this.$mask.style.left = 0
-      this.$mask.style.width = '100%'
-      this.$mask.style.height = '100%'
+      maskEl.style.height = `${this.$el.scrollHeight}px`
+      if (this.config.fixed) {
+        maskEl.style.position = 'fixed'
+      } else {
+        this.$el.style.position = 'relative'
+        maskEl.style.position = 'absolute'
+      }
     } else {
-      const { top, left, width, height } = this.$el.getBoundingClientRect()
-      this.$mask.style.top = parsePx(top)
-      this.$mask.style.left = parsePx(left)
-      this.$mask.style.width = parsePx(width)
-      this.$mask.style.height = parsePx(height)
+      this.$el.style.position = 'relative'
+      if (this.config.fixed) {
+        const { height } = this.$el.getBoundingClientRect()
+        maskEl.style.position = 'sticky'
+        maskEl.style.height = parsePx(height)
+        maskEl.style.marginBottom = parsePx(height * -1)
+      } else {
+        this.$el.style.position = 'relative'
+        maskEl.style.position = 'absolute'
+        maskEl.style.height = parsePx(this.$el.scrollHeight)
+      }
     }
 
-    this.$el.appendChild(this.$mask)
+    this.$el.prepend(maskEl)
+    this.$mask = maskEl
   }
 
   private createMaskImage() {

@@ -11,6 +11,12 @@ export interface InitConfig {
   text: string
 
   /**
+   * 切换水印位置为固定位置显示或跟随滚动
+   * @default true
+   */
+  fixed: boolean
+
+  /**
    * 水印文本颜色
    * @default '#000'
    */
