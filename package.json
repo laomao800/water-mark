@@ -4,6 +4,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "keywords": [
+    "WaterMark"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/laomao800/water-mark.git"
