@@ -24,33 +24,15 @@ export interface InitConfig {
 
   /**
    * 水印文字大小
-   * @default 12
+   * @default 14
    */
   fontSize?: number
 
   /**
-   * 水印透明度
-   * @default 0.08
-   */
-  opacity?: number
-
-  /**
-   * 水印文本间隔，单位像素
+   * 水印文本间隔，单位像素，支持[x轴, y轴]
    * @default 120
    */
-  gap?: number
-
-  /**
-   * 水印文本间隔，单位像素
-   * @default 120
-   */
-  xGap?: number
-
-  /**
-   * 水印文本间隔，单位像素
-   * @default 120
-   */
-  yGap?: number
+  gap?: number | [number, number]
 
   /**
    * 水印文本旋转角度
@@ -59,14 +41,34 @@ export interface InitConfig {
   rotate?: number
 
   /**
-   * 水印文本整体偏移量，[x轴, y轴]，单位像素
-   * @default [0, 0]
+   * 指定水印画布宽度，默认自动计算，
+   * 可在文字显示不完整时与 offset 配合调整偏移量
+   * @default null
    */
-  offset?: [number, number]
+  width?: number
+
+  /**
+   * 指定水印画布高度，默认自动计算，
+   * 可在文字显示不完整时与 offset 配合调整偏移量
+   * @default null
+   */
+  height?: number
+
+  /**
+   * 水印文本整体偏移量，单位像素，支持[x轴, y轴]
+   * @default 0 [0, 0]
+   */
+  offset?: number | [number, number]
 
   /**
    * 水印层 z-index 值
    * @default 999999
    */
   zIndex?: number
+
+  /**
+   * 显示渲染调试辅助线
+   * @default false
+   */
+  debug?: boolean
 }

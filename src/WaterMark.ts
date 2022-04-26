@@ -1,19 +1,27 @@
 import type { InitConfig } from './types'
 import { parsePx, getTextRect, isPlainObject } from './utils'
 
+const PX_RATIO = window.devicePixelRatio
+
+function getDeg(deg: number) {
+  return deg * (Math.PI / 180)
+}
+
 export default class WaterMark {
   private $el = document.body
   private $mask = null
   private text = ''
   private config: Partial<InitConfig> = {
     fixed: true,
-    fontSize: 12,
-    color: '#000',
-    opacity: 0.08,
-    gap: 120,
+    fontSize: 14,
+    color: 'rgba(0, 0, 0, 0.1)',
+    gap: 10,
     rotate: -15,
-    offset: [0, 0],
+    offset: 0,
+    width: null,
+    height: null,
     zIndex: 999999,
+    debug: false,
   }
 
   constructor(def: string | InitConfig) {
@@ -31,16 +39,16 @@ export default class WaterMark {
     }
 
     if (!this.$el) return
-
-    this.createMask()
   }
 
-  private createMask() {
+  private createMaskElm() {
+    // const { dataURL, width, height } = this.createWaterMarkImage()
+    const { dataURL } = this.createWaterMarkImage()
     const maskEl = document.createElement('div')
     maskEl.setAttribute('style', 'pointer-events:none;')
     maskEl.style.zIndex = String(this.config.zIndex)
-    maskEl.style.opacity = String(this.config.opacity)
-    maskEl.style.backgroundImage = `url("${this.createMaskImage()}")`
+    // maskEl.style.backgroundPosition = `${width}px ${height}px, 0 0`
+    maskEl.style.backgroundImage = `url(${dataURL})`
     maskEl.style.width = '100%'
     maskEl.style.top = '0'
     maskEl.style.left = '0'
@@ -67,43 +75,102 @@ export default class WaterMark {
       }
     }
 
+    this.destroy()
     this.$el.prepend(maskEl)
+    this.$el.dataset
     this.$mask = maskEl
   }
 
-  private createMaskImage() {
+  createWaterMarkImage() {
+    const { abs, sin, cos } = Math
+    const { offset, fontSize, gap, rotate, debug, width, height } = this.config
     const { width: textWidth, height: textHeight } = getTextRect(
       this.text,
-      this.config.fontSize
+      fontSize
     )
-    const { abs, sin, cos } = Math
-    const rotate = this.config.rotate
-    const gap = this.config.gap
 
-    let [offsetX, offsetY] = this.config.offset
-    offsetX = offsetX + this.config.fontSize
-    offsetY = offsetY + this.config.fontSize
-
-    if (rotate < 0) {
-      offsetY = offsetY + abs(textWidth * cos(rotate))
+    let gapX
+    let gapY
+    if (Array.isArray(gap)) {
+      ;[gapX, gapY] = gap
+    } else {
+      gapX = gap || 0
+      gapY = gap || 0
     }
-    let width = abs(textWidth * sin(rotate)) + abs(textHeight * cos(rotate))
-    let height = abs(textWidth * cos(rotate)) + abs(textHeight * sin(rotate))
-    width = Math.ceil(width + offsetX) + abs(textWidth * cos(rotate)) + gap * 2
-    height = Math.ceil(height) + gap
 
-    const _genText = (x, y) =>
-      `<text transform='translate(${x}, ${y}) rotate(${rotate})' fill='${color}' font-size='${this.config.fontSize}'>${this.text}</text>`
-    const color = encodeURIComponent(this.config.color)
-    const text1 = _genText(offsetX, offsetY)
-    const text2 = _genText(offsetX + textWidth + gap / 2, offsetY + gap)
-    const svg = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='${height}px' width='${width}px'>${text1}${text2}</svg>`
+    let offsetX
+    let offsetY
+    if (Array.isArray(offset)) {
+      ;[offsetX, offsetY] = offset
+    } else {
+      offsetX = offset || 0
+      offsetY = offset || 0
+    }
+    if (rotate < 0) {
+      offsetY = offsetY + abs(textWidth * sin(getDeg(rotate)))
+    }
+    let _width = width
+    if (!_width) {
+      _width = abs(textHeight * cos(getDeg(rotate)))
+      _width =
+        Math.ceil(_width + offsetX) +
+        abs(textWidth * cos(getDeg(rotate))) +
+        gapX * 2
+    }
+    let _height = height
+    if (!_height) {
+      _height =
+        abs(textWidth * sin(getDeg(rotate))) +
+        abs(textHeight * cos(getDeg(rotate)))
+      _height = Math.ceil(_height) + gapY
+    }
 
-    return svg
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    const canvasWidth = (_width + gapX) * PX_RATIO
+    const canvasHeight = (_height + gapY) * PX_RATIO
+    const canvasOffsetLeft = offsetX * PX_RATIO
+    const canvasOffsetTop = offsetY * PX_RATIO
+
+    canvas.width = canvasWidth
+    canvas.height = canvasHeight
+
+    // ctx.translate(0, 0)
+    const markWidth = canvasWidth * PX_RATIO
+    const markHeight = canvasHeight * PX_RATIO
+    if (debug) {
+      ctx.strokeStyle = '#aaa'
+      ctx.strokeRect(0, 0, markWidth, markHeight)
+    }
+    ctx.rotate(rotate * (Math.PI / 180))
+
+    if (debug) {
+      ctx.strokeStyle = '#369'
+      ctx.strokeRect(0, 0, markWidth, markHeight)
+    }
+    ctx.font = `${this.config.fontSize}px Arial`
+    ctx.fillStyle = this.config.color
+    ctx.fillText(
+      this.text,
+      canvasOffsetLeft,
+      canvasOffsetTop + fontSize * PX_RATIO
+    )
+    return {
+      dataURL: canvas.toDataURL(),
+      width: canvasWidth,
+      height: canvasHeight,
+    }
+  }
+
+  render() {
+    this.createMaskElm()
+    return this
   }
 
   destroy() {
-    this.$el.removeChild(this.$mask)
-    this.$mask = null
+    if (this.$mask) {
+      this.$el.removeChild(this.$mask)
+      this.$mask = null
+    }
   }
 }
