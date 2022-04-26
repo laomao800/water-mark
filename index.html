@@ -48,37 +48,6 @@
       </div>
     </div>
 
-    <script src="./dist/index.umd.js"></script>
-    <script>
-      waterMark({
-        el: '#box1',
-        text: '区域水印-固定',
-      })
-      waterMark({
-        el: '#box2',
-        text: '区域水印-跟随',
-        fixed: false,
-      })
-
-      const $close = document.querySelector('#btn-close')
-      const $btn1 = document.querySelector('#btn1')
-      const $btn2 = document.querySelector('#btn2')
-      function cleanUp() {
-        window.instance && window.instance.destroy()
-        delete window.instance
-      }
-      $close.addEventListener('click', cleanUp)
-      $btn1.addEventListener('click', function () {
-        cleanUp()
-        window.instance = waterMark('全屏水印-固定')
-      })
-      $btn2.addEventListener('click', function () {
-        cleanUp()
-        window.instance = waterMark({
-          text: '全屏水印-跟随',
-          fixed: false,
-        })
-      })
-    </script>
+    <script type="module" src="./demo/index.ts"></script>
   </body>
 </html>

@@ -13,25 +13,19 @@
   },
   "license": "MIT",
   "scripts": {
-    "serve": "cross-env serve=true rollup -c -w",
-    "build": "rollup -c"
+    "serve": "vite",
+    "build": "vite build"
   },
   "files": [
     "dist",
     "src",
     "types.d.ts"
   ],
-  "main": "dist/index.common.js",
+  "main": "dist/index.umd.js",
   "module": "dist/index.es.js",
   "devDependencies": {
-    "@rollup/plugin-typescript": "^5.0.2",
-    "cross-env": "^7.0.2",
-    "rollup": "^2.23.1",
-    "rollup-plugin-serve": "^1.0.3",
-    "rollup-plugin-typescript": "^1.0.1",
-    "rollup-plugin-uglify": "^6.0.4",
-    "tslib": "^2.0.1",
-    "typescript": "^3.9.7"
+    "typescript": "^3.9.7",
+    "vite": "^2.9.5"
   },
   "dependencies": {}
 }

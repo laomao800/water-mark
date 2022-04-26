@@ -1,20 +1,20 @@
 export interface InitConfig {
   /**
-   * 水印挂载节点
-   * @default document.body
-   */
-  el: string | HTMLElement
-
-  /**
    * 水印文本
    */
   text: string
 
   /**
+   * 水印挂载节点
+   * @default document.body
+   */
+  el?: string | HTMLElement
+
+  /**
    * 切换水印位置为固定位置显示或跟随滚动
    * @default true
    */
-  fixed: boolean
+  fixed?: boolean
 
   /**
    * 水印文本颜色
@@ -39,6 +39,18 @@ export interface InitConfig {
    * @default 120
    */
   gap?: number
+
+  /**
+   * 水印文本间隔，单位像素
+   * @default 120
+   */
+  xGap?: number
+
+  /**
+   * 水印文本间隔，单位像素
+   * @default 120
+   */
+  yGap?: number
 
   /**
    * 水印文本旋转角度
