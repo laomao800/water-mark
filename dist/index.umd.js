@@ -1,1 +1,200 @@
-!function(t,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):(t="undefined"!=typeof globalThis?globalThis:t||self).waterMark=e()}(this,function(){"use strict";var e=function(){return(e=Object.assign||function(t){for(var e,i=1,o=arguments.length;i<o;i++)for(var n in e=arguments[i])Object.prototype.hasOwnProperty.call(e,n)&&(t[n]=e[n]);return t}).apply(this,arguments)};function i(t){var e;return"Object"===(e=t,Object.prototype.toString.call(e).slice(8,-1))&&(t.constructor===Object&&Object.getPrototypeOf(t)===Object.prototype)}function u(t){var e=parseInt(t);return(e=isNaN(e)?0:e)+"px"}var o=(t.prototype.createMask=function(){var t,e=document.createElement("div");e.setAttribute("style","pointer-events:none;"),e.style.zIndex=String(this.config.zIndex),e.style.opacity=String(this.config.opacity),e.style.backgroundImage='url("'+this.createMaskImage()+'")',e.style.width="100%",e.style.top="0",e.style.left="0",this.$el===document.body?(e.style.height=this.$el.scrollHeight+"px",this.config.fixed?e.style.position="fixed":(this.$el.style.position="relative",e.style.position="absolute")):(this.$el.style.position="relative",this.config.fixed?(t=this.$el.getBoundingClientRect().height,e.style.position="sticky",e.style.height=u(t),e.style.marginBottom=u(-1*t)):(this.$el.style.position="relative",e.style.position="absolute",e.style.height=u(this.$el.scrollHeight))),this.$el.prepend(e),this.$mask=e},t.prototype.createMaskImage=function(){var i=this,t=function(t,e,i){void 0===i&&(i="1.4");var o=document.createElement("div");o.style.display="inline-block",o.style.whiteSpace="pre-wrap",o.style.position="fixed",o.style.opacity="0",o.style.fontSize=u(e),o.style.lineHeight=i,o.innerHTML=t,document.body.appendChild(o);var n=o.getBoundingClientRect(),s=n.width,l=n.height;return document.body.removeChild(o),{width:s,height:l}}(this.text,this.config.fontSize),e=t.width,o=t.height,n=Math.abs,s=Math.sin,l=Math.cos,r=this.config.rotate,h=this.config.gap,c=this.config.offset,a=c[0],f=c[1];a+=this.config.fontSize,f+=this.config.fontSize,r<0&&(f+=n(e*l(r)));function p(t,e){return"<text transform='translate("+t+", "+e+") rotate("+r+")' fill='"+d+"' font-size='"+i.config.fontSize+"'>"+i.text+"</text>"}var g=n(e*s(r))+n(o*l(r)),y=n(e*l(r))+n(o*s(r)),g=Math.ceil(g+a)+n(e*l(r))+2*h,y=Math.ceil(y)+h,d=encodeURIComponent(this.config.color);return"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='"+y+"px' width='"+g+"px'>"+p(a,f)+p(a+e+h/2,f+h)+"</svg>"},t.prototype.destroy=function(){this.$el.removeChild(this.$mask),this.$mask=null},t);function t(t){this.$el=document.body,this.$mask=null,this.text="",this.config={fixed:!0,fontSize:12,color:"#000",opacity:.08,gap:120,rotate:-15,offset:[0,0],zIndex:999999},i(t)?(this.config=e(e({},this.config),t),this.text=t.text,"string"==typeof t.el?this.$el=document.querySelector(t.el):t.el&&(this.$el=t.el)):this.text=t,this.$el&&this.createMask()}return function(t){return new o(t)}});
+var __defProp = Object.defineProperty;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+(function(global, factory) {
+  typeof exports === "object" && typeof module !== "undefined" ? factory(exports) : typeof define === "function" && define.amd ? define(["exports"], factory) : (global = typeof globalThis !== "undefined" ? globalThis : global || self, factory(global.waterMark = {}));
+})(this, function(exports2) {
+  "use strict";
+  function getType(payload) {
+    return Object.prototype.toString.call(payload).slice(8, -1);
+  }
+  function isPlainObject(payload) {
+    if (getType(payload) !== "Object")
+      return false;
+    return payload.constructor === Object && Object.getPrototypeOf(payload) === Object.prototype;
+  }
+  const parsePx = (input) => {
+    let num = parseInt(input);
+    num = !isNaN(num) ? num : 0;
+    return `${num}px`;
+  };
+  const getTextRect = (text, fontSize, lineHeight = "1.4") => {
+    const $wrap = document.createElement("div");
+    $wrap.style["display"] = "inline-block";
+    $wrap.style["whiteSpace"] = "pre-wrap";
+    $wrap.style["position"] = "fixed";
+    $wrap.style["opacity"] = "0";
+    $wrap.style["fontSize"] = parsePx(fontSize);
+    $wrap.style["lineHeight"] = lineHeight;
+    $wrap.innerHTML = text;
+    document.body.appendChild($wrap);
+    const { width, height } = $wrap.getBoundingClientRect();
+    document.body.removeChild($wrap);
+    return { width, height };
+  };
+  const PX_RATIO = window.devicePixelRatio;
+  function getDeg(deg) {
+    return deg * (Math.PI / 180);
+  }
+  class WaterMark {
+    constructor(def) {
+      this.$el = document.body;
+      this.$mask = null;
+      this.text = "";
+      this.config = {
+        fixed: true,
+        fontSize: 14,
+        color: "rgba(0, 0, 0, 0.1)",
+        gap: 10,
+        rotate: -15,
+        offset: 0,
+        width: null,
+        height: null,
+        zIndex: 999999,
+        debug: false
+      };
+      if (isPlainObject(def)) {
+        this.config = __spreadValues(__spreadValues({}, this.config), def);
+        this.text = def.text;
+        if (typeof def.el === "string") {
+          this.$el = document.querySelector(def.el);
+        } else if (def.el) {
+          this.$el = def.el;
+        }
+      } else {
+        this.text = def;
+      }
+      if (!this.$el)
+        return;
+    }
+    createMaskElm() {
+      const { dataURL } = this.createWaterMarkImage();
+      const maskEl = document.createElement("div");
+      maskEl.setAttribute("style", "pointer-events:none;");
+      maskEl.style.zIndex = String(this.config.zIndex);
+      maskEl.style.backgroundImage = `url(${dataURL})`;
+      maskEl.style.width = "100%";
+      maskEl.style.top = "0";
+      maskEl.style.left = "0";
+      if (this.$el === document.body) {
+        maskEl.style.height = `${this.$el.scrollHeight}px`;
+        if (this.config.fixed) {
+          maskEl.style.position = "fixed";
+        } else {
+          this.$el.style.position = "relative";
+          maskEl.style.position = "absolute";
+        }
+      } else {
+        this.$el.style.position = "relative";
+        if (this.config.fixed) {
+          const { height } = this.$el.getBoundingClientRect();
+          maskEl.style.position = "sticky";
+          maskEl.style.height = parsePx(height);
+          maskEl.style.marginBottom = parsePx(height * -1);
+        } else {
+          this.$el.style.position = "relative";
+          maskEl.style.position = "absolute";
+          maskEl.style.height = parsePx(this.$el.scrollHeight);
+        }
+      }
+      this.destroy();
+      this.$el.prepend(maskEl);
+      this.$el.dataset;
+      this.$mask = maskEl;
+    }
+    createWaterMarkImage() {
+      const { abs, sin, cos } = Math;
+      const { offset, fontSize, gap, rotate, debug, width, height } = this.config;
+      const { width: textWidth, height: textHeight } = getTextRect(this.text, fontSize);
+      let gapX;
+      let gapY;
+      if (Array.isArray(gap)) {
+        [gapX, gapY] = gap;
+      } else {
+        gapX = gap || 0;
+        gapY = gap || 0;
+      }
+      let offsetX;
+      let offsetY;
+      if (Array.isArray(offset)) {
+        [offsetX, offsetY] = offset;
+      } else {
+        offsetX = offset || 0;
+        offsetY = offset || 0;
+      }
+      if (rotate < 0) {
+        offsetY = offsetY + abs(textWidth * sin(getDeg(rotate)));
+      }
+      let _width = width;
+      if (!_width) {
+        _width = abs(textHeight * cos(getDeg(rotate)));
+        _width = Math.ceil(_width + offsetX) + abs(textWidth * cos(getDeg(rotate))) + gapX * 2;
+      }
+      let _height = height;
+      if (!_height) {
+        _height = abs(textWidth * sin(getDeg(rotate))) + abs(textHeight * cos(getDeg(rotate)));
+        _height = Math.ceil(_height) + gapY;
+      }
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      const canvasWidth = (_width + gapX) * PX_RATIO;
+      const canvasHeight = (_height + gapY) * PX_RATIO;
+      const canvasOffsetLeft = offsetX * PX_RATIO;
+      const canvasOffsetTop = offsetY * PX_RATIO;
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+      const markWidth = canvasWidth * PX_RATIO;
+      const markHeight = canvasHeight * PX_RATIO;
+      if (debug) {
+        ctx.strokeStyle = "#aaa";
+        ctx.strokeRect(0, 0, markWidth, markHeight);
+      }
+      ctx.rotate(rotate * (Math.PI / 180));
+      if (debug) {
+        ctx.strokeStyle = "#369";
+        ctx.strokeRect(0, 0, markWidth, markHeight);
+      }
+      ctx.font = `${this.config.fontSize}px Arial`;
+      ctx.fillStyle = this.config.color;
+      ctx.fillText(this.text, canvasOffsetLeft, canvasOffsetTop + fontSize * PX_RATIO);
+      return {
+        dataURL: canvas.toDataURL(),
+        width: canvasWidth,
+        height: canvasHeight
+      };
+    }
+    render() {
+      this.createMaskElm();
+      return this;
+    }
+    destroy() {
+      if (this.$mask) {
+        this.$el.removeChild(this.$mask);
+        this.$mask = null;
+      }
+    }
+  }
+  function renderWaterMark(config) {
+    return new WaterMark(config).render();
+  }
+  function createWaterMarkImage(config) {
+    return new WaterMark(config).createWaterMarkImage();
+  }
+  exports2.WaterMark = WaterMark;
+  exports2.createWaterMarkImage = createWaterMarkImage;
+  exports2["default"] = renderWaterMark;
+  Object.defineProperties(exports2, { __esModule: { value: true }, [Symbol.toStringTag]: { value: "Module" } });
+});
